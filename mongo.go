@@ -118,19 +118,6 @@ func que() {
 			log.Fatal(err)
 		}
 	}
-	/*qu := NewQueue()
-	for true {
-
-		res := Que{}
-		err = c.Find(nil).One(&res)
-		if err != nil {
-			break
-			log.Fatal(err)
-		}
-		qu.push(res.Name)
-	}
-	qu.push("hi")
-	qu.dump()*/
 }
 func que1(qu *Queue) {
 	for true {
