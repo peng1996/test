@@ -1,5 +1,11 @@
 package main
 
+/*数据库为:mongoDB
+数据库名 test
+表queue1，queue2，queue3为假设的三个匹配队列，同时进行游戏匹配
+user为游戏玩家用户表
+queue表为类似消息队列作用
+*/
 import (
 	"container/list"
 	"fmt"
@@ -11,16 +17,22 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+//定义常量 N代表一个队列匹配的用户数量（N个玩家匹配在一起游戏）
 const N int = 5
 
+//用户
 type User struct {
 	State int
 	Name  string
 }
 
+//消息队列
 type Que struct {
 	Name string
 }
+
+//Que1.2.3为三个匹配队列
+
 type Que1 struct {
 	Name string
 }
@@ -31,6 +43,7 @@ type Que3 struct {
 	Name string
 }
 
+//用于多线程从消息队列读数据时,特设的线程安全的队列
 type Queue struct {
 	data *list.List
 }
@@ -42,6 +55,7 @@ var l1 = list.New()
 var l2 = list.New()
 var l3 = list.New()
 
+//实现队列链表线程安全
 func NewQueue() *Queue {
 	q := new(Queue)
 	q.data = list.New()
@@ -251,7 +265,7 @@ func que3(qu *Queue) {
 	}
 }
 func main() {
-	go que()
+	go que() //将user表中 标识(列名)为0的数据找出,改为1,将用户名复制到queue表中
 	time.Sleep(1000 * time.Millisecond)
 	session, err := mgo.Dial("localhost:27017")
 	if err != nil {
@@ -270,6 +284,8 @@ func main() {
 	for i := 0; i < len(queues); i++ {
 		qu.push(queues[i].Name)
 	}
+
+	//从消息队列中抓人,匹配到队列里
 	go que1(qu)
 	go que2(qu)
 	go que3(qu)
